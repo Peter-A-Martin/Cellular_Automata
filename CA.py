@@ -138,36 +138,36 @@ class SmoothLife:
             self.field[r: r + radius, c: c + radius] = intensity
 
 
-class CellArray:
-    def __init__(self, size):
-        self.cells = [[SmoothCell() for y in range(size[1])] for x in range(size[0])]
-        self.neighborhoodMask = np.zeros((len(self.cells[0][0].neighborhoodMask), len(self.cells[0][0].neighborhoodMask[0])))
-
-    def export_states(self):
-        state_array = np.zeros((len(self.cells), len(self.cells[0])))
-        for i, row in enumerate(self.cells):
-            for j, element in enumerate(row):
-                state_array[i, j] = element.state
-        return state_array
-
-    def generate_neighborhood(self, expanded_state_array, y_coord, x_coord):
-        maskY = int((len(self.neighborhoodMask) - 1) / 2)
-        maskX = int((len(self.neighborhoodMask[0]) - 1) / 2)
-        neighborhoodSlice = expanded_state_array[(y_coord - maskY):(y_coord + maskY + 1),
-                            (x_coord - maskX):(x_coord + maskX + 1)]
-        return neighborhoodSlice
-
-    def update_cells(self):
-        state_array = self.export_states()
-        update_array = np.append(state_array, state_array, axis=0)
-        update_array = np.append(update_array, state_array, axis=0)
-        update_array = np.append(update_array, update_array, axis=1)
-        update_array = np.append(update_array[:, 0:len(state_array[0])], update_array, axis=1)
-        for i in range(len(self.cells), len(self.cells) * 2):
-            for j in range(len(self.cells[0]), len(self.cells[0]) * 2):
-                array_slice = self.generate_neighborhood(update_array, i, j)
-                self.cells[i - len(self.cells)][j - len(self.cells[0])].update(array_slice)
-                # element.update(array_slice)
+# class CellArray:
+#     def __init__(self, size):
+#         self.cells = [[SmoothCell() for y in range(size[1])] for x in range(size[0])]
+#         self.neighborhoodMask = np.zeros((len(self.cells[0][0].neighborhoodMask), len(self.cells[0][0].neighborhoodMask[0])))
+#
+#     def export_states(self):
+#         state_array = np.zeros((len(self.cells), len(self.cells[0])))
+#         for i, row in enumerate(self.cells):
+#             for j, element in enumerate(row):
+#                 state_array[i, j] = element.state
+#         return state_array
+#
+#     def generate_neighborhood(self, expanded_state_array, y_coord, x_coord):
+#         maskY = int((len(self.neighborhoodMask) - 1) / 2)
+#         maskX = int((len(self.neighborhoodMask[0]) - 1) / 2)
+#         neighborhoodSlice = expanded_state_array[(y_coord - maskY):(y_coord + maskY + 1),
+#                             (x_coord - maskX):(x_coord + maskX + 1)]
+#         return neighborhoodSlice
+#
+#     def update_cells(self):
+#         state_array = self.export_states()
+#         update_array = np.append(state_array, state_array, axis=0)
+#         update_array = np.append(update_array, state_array, axis=0)
+#         update_array = np.append(update_array, update_array, axis=1)
+#         update_array = np.append(update_array[:, 0:len(state_array[0])], update_array, axis=1)
+#         for i in range(len(self.cells), len(self.cells) * 2):
+#             for j in range(len(self.cells[0]), len(self.cells[0]) * 2):
+#                 array_slice = self.generate_neighborhood(update_array, i, j)
+#                 self.cells[i - len(self.cells)][j - len(self.cells[0])].update(array_slice)
+#                 # element.update(array_slice)
 
 
 class CellConway:
@@ -197,40 +197,193 @@ class Cell:
                 self.movement[i, j] = min(self.movement[i, j], 1)
         return 0
 
+# class SmoothCell:
+#     def __init__(self):
+#         self.state = rn.random()
+#         self.cellMask = smoothCell
+#         self.cellNormalization = cellNorm
+#         self.neighborhoodMask = smoothNeighborhood
+#         self.maskNormalization = neighNorm
+#         self.alphaN = 0.028
+#         self.alphaM = 0.147
+#         self.b1 = 0.278
+#         self.b2 = 0.365
+#         self.d1 = 0.267
+#         self.d2 = 0.445
+#         self.stepsize = 1
+#
+#     def update(self, neighborhood):
+#         n = np.sum(neighborhood * self.neighborhoodMask) / self.maskNormalization
+#         m = np.sum(neighborhood * self.cellMask) / self.cellNormalization
+#         dummy = self.s_function(n, m) * self.stepsize
+#         print(dummy)
+#         self.state += dummy * self.state
+#         return 0
+#
+#     def sigma_1(self, x, a, alpha):
+#         temp = (x - a) * 4 / alpha
+#         return 1 / (1 + math.exp(-temp))
+#
+#     def sigma_2(self, x, a, b, alpha):
+#         return self.sigma_1(x, a, alpha) * (1 - self.sigma_1(x, b, alpha))
+#
+#     def sigma_m(self, x, y, m, alpha):
+#         return x * (1 - self.sigma_1(m,0.5, alpha)) + y * self.sigma_1(m, 0.5, alpha)
+#
+#     def s_function(self, n, m):
+#         return self.sigma_2(n, self.sigma_m(self.b1, self.b2, m, self.alphaM),
+#                             self.sigma_m(self.b1, self.b2, m, self.alphaM), self.alphaN)
 
-class SmoothCell:
-    def __init__(self):
-        self.state = rn.random()
-        self.cellMask = smoothCell
-        self.cellNormalization = cellNorm
-        self.neighborhoodMask = smoothNeighborhood
-        self.maskNormalization = neighNorm
-        self.alphaN = 0.028
-        self.alphaM = 0.147
-        self.b1 = 0.278
-        self.b2 = 0.365
-        self.d1 = 0.267
-        self.d2 = 0.445
-        self.stepsize = 1
+class kernalLife:
+    def __init__(self, size, rules):
+        self.rules = rules
+        self.field = np.zeros(size)
+        self.N_kernal = self.rules.makeNeighborhood(size)
+        self.fast_N_kernal = np.fft.fft2(self.N_kernal)
+        self.cell_kernal = self.rules.makeCell(size)
+        self.fast_cell_kernal = np.fft.fft2(self.cell_kernal)
+        self.rules = rules
+        self.dt = 0.1
 
-    def update(self, neighborhood):
-        n = np.sum(neighborhood * self.neighborhoodMask) / self.maskNormalization
-        m = np.sum(neighborhood * self.cellMask) / self.cellNormalization
-        dummy = self.s_function(n, m) * self.stepsize
-        print(dummy)
-        self.state += dummy * self.state
-        return 0
+    def generate_complex_kernal(self, betas):
+        self.N_kernal = self.rules.complexNeighborhood((len(self.field), len(self.field[0])), betas)
+        self.fast_N_kernal = np.fft.fft2(self.N_kernal)
+
+    def populate_field(self, number, radius):
+        points = []
+        for i in range(number):
+            points.append([math.floor(rn.random()*len(self.field)), math.floor(rn.random()*len(self.field[0]))])
+        for i, row in enumerate(self.field):
+            for j, element in enumerate(row):
+                for point in points:
+                    if abs(i - point[0]) < radius and abs(j - point[1]) < radius:
+                        self.field[i, j] = 1
+
+    def update(self):
+        neighborhoodField = np.zeros((len(self.field), len(self.field[0])))
+        cellField = np.zeros((len(self.field), len(self.field[0])))
+        for i, row in enumerate(self.field):
+            for j, element in enumerate(row):
+                rollNeighborhood = np.roll(self.N_kernal, i, axis=0)
+                rollNeighborhood = np.roll(rollNeighborhood, j, axis=1)
+                neighborhoodField[i, j] = np.sum(rollNeighborhood * self.field)
+                rollCell = np.roll(self.cell_kernal, i, axis=0)
+                rollCell = np.roll(rollCell, j, axis=1)
+                cellField[i, j] = np.sum(rollCell * self.field)
+        newField = np.clip(self.field + self.dt * self.rules.lenia_growth(neighborhoodField), 0, 1)
+        self.field = newField
+        return newField
+
+    def fast_update(self, method='Lenia'):
+        fastField = np.fft.fft2(self.field)
+        if method == 'Lenia':
+            potential = fastField * self.fast_N_kernal
+            potential = np.fft.fftshift(np.real(np.fft.ifft2(potential)))
+            growth = self.rules.lenia_growth(potential)
+            newField = np.clip(self.field + self.dt * growth, 0, 1)
+            self.field = newField
+        elif method == 'Custom':
+            potential = fastField * self.fast_N_kernal
+            potential = np.fft.fftshift(np.real(np.fft.ifft2(potential)))
+            cellField = fastField * self.fast_cell_kernal
+            cellField = np.real(np.fft.ifft2(cellField))
+            growth = self.rules.transition(potential, cellField)
+            newField = np.clip(self.field + self.dt * growth, 0, 1)
+            self.field = newField
+        return newField
+
+
+class rules:
+    def __init__(self, radius):
+        self.alpha = 4
+        self.radius = radius
+        self.gWidth = 0.07
+        self.gCenter = 0.40
+        self.shift = -0.2
+
+    def lerp(self, a, b, t):
+        return (1 - t) * a + t * b
 
     def sigma_1(self, x, a, alpha):
         temp = (x - a) * 4 / alpha
-        return 1 / (1 + math.exp(-temp))
+        return 1 / (1 + np.exp(-temp))
 
     def sigma_2(self, x, a, b, alpha):
         return self.sigma_1(x, a, alpha) * (1 - self.sigma_1(x, b, alpha))
 
-    def sigma_m(self, x, y, m, alpha):
-        return x * (1 - self.sigma_1(m,0.5, alpha)) + y * self.sigma_1(m, 0.5, alpha)
+    def generate_radii(self, size):
+        x, y = size
+        # Generates a grid of points, each with a value equal to their distance from the center of the grid
+        xx, yy = np.mgrid[:y, :x]
+        return np.sqrt((xx - x / 2) ** 2 + (yy - y / 2) ** 2)
 
-    def s_function(self, n, m):
-        return self.sigma_2(n, self.sigma_m(self.b1, self.b2, m, self.alphaM),
-                            self.sigma_m(self.b1, self.b2, m, self.alphaM), self.alphaN)
+    def makeNeighborhood(self, size):
+        nKernal = self.generate_radii(size)
+        nKernal[nKernal > 3 * self.radius] = 0
+        nKernal /= np.max(nKernal)
+        nKernal = np.exp(self.alpha - self.alpha / (4 * nKernal * (1 - nKernal)))
+        # The circle is positioned at the corners so that it is accessible at [0,0]
+        # This will help when applying the circle mask to the entire field
+        nKernal = np.roll(nKernal, size[0] // 2, axis=0)
+        nKernal = np.roll(nKernal, size[1] // 2, axis=1)
+        return nKernal / np.sum(nKernal)
+
+    def complexNeighborhood(self, size, betas):
+        shell = np.zeros(size)
+        for i, element in enumerate(betas):
+            nKernal = self.generate_radii(size)
+            nKernal[nKernal > 3 * self.radius * (i + 1)] = 0
+            nKernal /= np.max(nKernal)
+            nKernal = np.exp(self.alpha - self.alpha / (4 * nKernal * (1 - nKernal)))
+            # The circle is positioned at the corners so that it is accessible at [0,0]
+            # This will help when applying the circle mask to the entire field
+            nKernal = np.roll(nKernal, size[0] // 2, axis=0)
+            nKernal = np.roll(nKernal, size[1] // 2, axis=1)
+            nKernal *= element
+            shell += nKernal
+        return shell / np.sum(shell)
+
+    def makeCell(self, size):
+        cellKernal = self.generate_radii(size)
+        cellKernal /= self.radius
+        cellKernal = 1 - np.pow(cellKernal, self.alpha)
+        cellKernal[cellKernal < 0] = 0
+        cellKernal = np.roll(cellKernal, size[0] // 2, axis=0)
+        cellKernal = np.roll(cellKernal, size[1] // 2, axis=1)
+        return cellKernal / np.sum(cellKernal)
+
+    def transition(self, n, m):
+        variable_center = self.gCenter + self.shift / (1 + np.exp(-15 * (m - 0.5)))
+        growth = 2 * np.exp(-(n - variable_center) ** 2 / (2 * self.gWidth ** 2)) - 1
+        return growth
+
+    def lenia_growth(self, n):
+        growth = 2 * np.exp(-(n - self.gCenter) ** 2 / (2 * self.gWidth ** 2)) - 1
+        return growth
+
+
+
+test = rules(15)
+# plt.imshow(test.complexNeighborhood((500, 500), [1, 0, 0.5, 0, 0.3]))
+# plt.show()
+# plt.imshow(test.makeCell((100,100)) + test.makeNeighborhood((100,100)))
+# plt.imshow(test.makeCell((100,100)))
+testField = kernalLife((1500, 1500), test)
+testField.generate_complex_kernal([1, 0, 0.5, 0, 0.7])
+testField.populate_field(100, 55)
+imgs = []
+length = 1000
+for i in range(length):
+    print(i)
+    imgs.append(testField.fast_update())
+
+fig, ax = plt.subplots()
+i = 0
+while True:
+    ax.clear()
+    ax.imshow(imgs[i])
+    ax.set_title(f"frame {i}")
+    plt.pause(0.05)
+    i += 1
+    if i == length:
+        i = 0
